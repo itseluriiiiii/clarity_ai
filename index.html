@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarity - Critical Thinking Companion</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+
+    <!-- Preloader -->
+    <div class="preloader-container">
+        <div class="loader-box">
+            <div class="l1"></div>
+            <div class="l2"></div>
+            <div class="l3"></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <i data-feather="shield"></i>
+            <span>Clarity</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn active">Home</a>
+            <a href="scanner.html" class="nav-btn">Scanner</a>
+            <a href="training.html" class="nav-btn">Training</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app">
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Think Clearly. <br>Spot the Bias.</h1>
+                <p>Your AI companion for navigating the information age.</p>
+
+                <div class="hero-buttons">
+                    <a href="scanner.html" class="cta-btn primary">Start Analysis</a>
+                    <a href="#dashboard" class="cta-btn secondary">Learn More</a>
+                </div>
+            </div>
+
+            <div class="scroll-indicator">
+                <span>Scroll Down</span>
+                <i class="scroll-arrow">↓</i>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard-section">
+
+            <div class="dashboard-grid">
+
+                <!-- Left Column: Cards -->
+                <div class="dashboard-left">
+
+                    <!-- Card 1 -->
+                    <div class="info-card expanded">
+                        <div class="card-header">
+                            <h3>Daily Insight</h3>
+                            <i data-feather="minus"></i>
+                        </div>
+
+                        <div class="card-content">
+                            <p>Did you know? 60% of people share headlines without reading the article. Always check the
+                                source before you share.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="info-card collapsed">
+                        <div class="card-header">
+                            <h3>Cognitive Streak</h3>
+                            <i data-feather="plus"></i>
+                        </div>
+
+                        <div class="card-content hidden">
+                            <div class="streak-value">3 Days</div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="info-card collapsed">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                            <i data-feather="plus"></i>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Feature Card -->
+                <div class="feature-card">
+
+                    <div class="feature-content">
+                        <span class="badge">New Module</span>
+                        <h2>Master Your Mind</h2>
+                        <p>Level up your critical thinking skills with our advanced logic training modules.</p>
+
+                        <a href="training.html" class="feature-btn" style="text-decoration: none;">
+                            Start Training <i data-feather="arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="feature-visual">
+                        <div class="visual-circle"></div>
+                        <div class="visual-blur"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h2 class="footer-logo">Clarity</h2>
+                    <p class="footer-tag">Think Clearly. Choose Wisely.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="scanner.html">Scanner</a></li>
+                        <li><a href="training.html">Training</a></li>
+                    </ul>
+                </div>
+                <div class="footer-bottom">
+                    <p class="footer-copy">© 2025 NeuroFusion Tech • All Rights Reserved</p>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        feather.replace();
+    </script>
+
+</body>
+
+</html>

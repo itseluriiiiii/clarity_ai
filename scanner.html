@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner - QLogic</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+     <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <i data-feather="shield"></i>
+            <span>QLogic</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="scanner.html" class="nav-btn active">Scanner</a>
+            <a href="training.html" class="nav-btn">Training</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app">
+        <section class="scanner-container">
+            <h2>Credibility Scanner</h2>
+            <p>Paste text or a URL to analyze for bias and fallacies.</p>
+
+            <textarea id="input-text" placeholder="Paste article text here..."></textarea>
+
+            <button id="analyze-btn" class="primary-btn" onclick="analyzeContent()">
+                <span id="btn-text">Run Analysis</span>
+                <span id="btn-loader" class="loader hidden"></span>
+            </button>
+
+            <!-- RESULTS SECTION -->
+            <div id="results-area" class="results-area hidden">
+                <div class="score-card">
+                    <div class="score-circle" id="score-circle">
+                        <span id="score-value">--</span>
+                    </div>
+                    <div class="score-label">Credibility Score</div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric">
+                        <span class="label">Emotion</span>
+                        <span class="value" id="metric-emotion">--</span>
+                    </div>
+                    <div class="metric">
+                        <span class="label">Credibility</span>
+                        <span class="value" id="metric-credibility">--</span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>Summary</h3>
+                    <p id="summary-text">...</p>
+                </div>
+
+                <div class="details-section">
+                    <h3>Detected Issues</h3>
+                    <ul id="bias-list" class="bias-list">
+                        <!-- Bias items will be injected here -->
+                    </ul>
+                </div>
+
+                <div class="recommendations-section">
+                    <h3>Recommendations</h3>
+                    <ul id="rec-list" class="rec-list">
+                        <!-- Recommendations injected here -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+
+</html>
