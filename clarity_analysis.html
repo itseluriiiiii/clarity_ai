@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarity Analysis - Clarity</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .score-meter {
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, 
+                #10B981 0%, 
+                #34D399 20%, 
+                #F59E0B 40%, 
+                #F97316 60%, 
+                #EF4444 80%, 
+                #DC2626 100%);
+            margin: 12px 0;
+        }
+        .score-fill {
+            height: 100%;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: width 1s ease-in-out;
+        }
+        .analysis-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: var(--glass-border);
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--text-primary);
+        }
+        .distortion-tag {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Preloader -->
+    <div class="preloader-container">
+        <div class="loader-box">
+            <div class="l1"></div>
+            <div class="l2"></div>
+            <div class="l3"></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>Clarity</span>
+        </div>
+
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i data-feather="menu"></i>
+        </button>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="scanner.html" class="nav-btn">Scanner</a>
+            <a href="clarity_analysis.html" class="nav-btn active">Clarity Analysis</a>
+            <a href="reflection-guide.html" class="nav-btn">Reflection Guide</a>
+            <a href="chatbot.html" class="nav-btn">Chatbot</a>
+        </div>
+    </nav>
+
+    <main id="app">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Clarity Analysis</h1>
+                <p>Analyze text for cognitive load, clarity, and potential distortions</p>
+            </div>
+        </section>
+
+        <section class="container">
+
+            <div class="analysis-card">
+                <h2 class="section-title">Text Analysis</h2>
+                <p class="section-subtitle mb-4">Paste your text below to analyze it for cognitive load and clarity</p>
+                
+                <div class="form-group">
+                    <textarea 
+                        id="text-input" 
+                        rows="6" 
+                        class="form-input"
+                        placeholder="Paste your text here..."></textarea>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button 
+                        id="analyze-btn" 
+                        class="primary-btn"
+                        onclick="analyzeText()">
+                        <span id="btn-text">Analyze Text</span>
+                        <span id="btn-loader" class="loader hidden"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="results" class="hidden">
+                <div id="results-loader" class="analysis-card hidden">
+                    <div class="text-center py-8">
+                        <div class="loader mx-auto"></div>
+                        <p class="mt-4 text-gray-600">Analyzing your text...</p>
+                    </div>
+                </div>
+
+                <div id="results-error" class="analysis-card hidden"></div>
+
+                <div id="results-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <!-- Main Scores -->
+                    <div class="analysis-card">
+                        <h2 class="section-title">Key Metrics</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between">
+                                    <span class="metric-label">Misinformation Risk</span>
+                                    <span id="misinformation-score" class="metric-value">--</span>
+                                </div>
+                                <div class="score-meter">
+                                    <div id="misinformation-fill" class="score-fill"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" id="risk-label">Submit text to analyze</p>
+                            </div>
+                            <div>
+                                <div class="flex justify-between">
+                                    <span class="metric-label">Emotional Intensity</span>
+                                    <span id="emotional-intensity" class="metric-value">--</span>
+                                </div>
+                                <div class="score-meter">
+                                    <div id="emotional-intensity-fill" class="score-fill"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" id="credibility-rating">Credibility rating will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Identified Distortions -->
+                    <div class="analysis-card">
+                        <h2 class="section-title">Identified Distortions</h2>
+                        <div id="distortions" class="space-y-3 text-sm text-gray-600">
+                            <p>No analysis yet. Run an analysis to see cognitive distortions.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="analysis-card">
+                    <h2 class="section-title">Detailed Analysis</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="metric-label">Emotional Load</span>
+                                <span id="emotional-load-value" class="metric-value">--/10</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="emotional-load-bar" class="progress-fill" style="width: 0%; background-color: #F59E0B;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="metric-label">Logical Coherence</span>
+                                <span id="logical-coherence-value" class="metric-value">--/10</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="logical-coherence-bar" class="progress-fill" style="width: 0%; background-color: #10B981;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="metric-label">Distortion Density</span>
+                                <span id="distortion-density-value" class="metric-value">--/10</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="distortion-density-bar" class="progress-fill" style="width: 0%; background-color: #EF4444;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="metric-label">Threat Perception</span>
+                                <span id="threat-perception-value" class="metric-value">--/10</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="threat-perception-bar" class="progress-fill" style="width: 0%; background-color: #F97316;"></div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="metric-label">Clarity Index</span>
+                                <span id="clarity-index-value" class="metric-value">--/10</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="clarity-index-bar" class="progress-fill" style="width: 0%; background-color: #3B82F6;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h2 class="section-title">Analysis Summary</h2>
+                    <div id="summary" class="prose max-w-none text-gray-700">
+                        <p>Submit text to see analysis results.</p>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h2 class="section-title">Recommendations</h2>
+                    <div id="recommendations" class="text-sm text-gray-600">
+                        <p>No recommendations yet.</p>
+                    </div>
+                </div>
+
+                <div class="analysis-card">
+                    <h2 class="section-title">Reflection Guide</h2>
+                    <div id="reflection-steps" class="space-y-4 text-sm text-gray-600">
+                        <p>Run an analysis to receive reflection prompts.</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+    <script>
+        // Initialize feather icons
+        feather.replace();
+        
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navLinks.classList.contains('active')) {
+                        feather.icons.x.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    } else {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            }
+            
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    const icon = document.querySelector('.menu-toggle i');
+                    if (icon) {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            });
+        });
+        
+        // Show preloader while page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide preloader when page is loaded
+            setTimeout(() => {
+                const preloader = document.querySelector('.preloader-container');
+                if (preloader) {
+                    preloader.classList.add('fade-out');
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 500);
+                }
+            }, 1000);
+
+            // Initialize feather icons
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        });
+
+        async function analyzeText() {
+            const textInput = document.getElementById('text-input').value.trim();
+            if (!textInput) {
+                showToast('Please enter some text to analyze', 'error');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnLoader = document.getElementById('btn-loader');
+            const resultsArea = document.getElementById('results');
+            
+            // Update UI for loading state
+            analyzeBtn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            btnLoader.classList.remove('hidden');
+            if (resultsArea) {
+                resultsArea.classList.remove('hidden');
+            }
+            setResultsVisibility({ showLoader: true, showContent: false, showError: false });
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: textInput })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to analyze text');
+                }
+
+                console.log('Analysis API response:', data);
+                displayResults(data);
+            } catch (error) {
+                console.error('Analysis error:', error);
+                showToast(error.message || 'An error occurred during analysis', 'error');
+                renderAnalysisError(error.message || 'An unknown error occurred', error.raw_output ? JSON.stringify(error, null, 2) : '');
+            } finally {
+                // Reset button state
+                analyzeBtn.disabled = false;
+                btnText.textContent = 'Analyze Text';
+                btnLoader.classList.add('hidden');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsArea = document.getElementById('results');
+            if (!resultsArea) return;
+
+            if (data.error) {
+                renderAnalysisError(data.error, data.details);
+                return;
+            }
+
+            setResultsVisibility({ showLoader: false, showContent: true, showError: false });
+            resultsArea.classList.remove('hidden');
+
+            const toNumber = (value, fallback = 0) => {
+                const num = Number(value);
+                return Number.isFinite(num) ? num : fallback;
+            };
+
+            try {
+                const misinfoScore = toNumber(data.misinformation_score, null);
+                const misinfoScoreElement = document.getElementById('misinformation-score');
+                const misinfoFill = document.getElementById('misinformation-fill');
+                const riskLabel = document.getElementById('risk-label');
+                if (misinfoScoreElement) {
+                    misinfoScoreElement.textContent = misinfoScore !== null ? misinfoScore : '--';
+                }
+                if (misinfoFill && misinfoScore !== null) {
+                    const bounded = Math.max(0, Math.min(100, misinfoScore));
+                    misinfoFill.style.width = `${bounded}%`;
+                    let riskColor = '#10B981';
+                    let riskText = 'Low risk';
+                    if (bounded >= 70) {
+                        riskColor = '#DC2626';
+                        riskText = 'High risk';
+                    } else if (bounded >= 40) {
+                        riskColor = '#F59E0B';
+                        riskText = 'Medium risk';
+                    }
+                    misinfoFill.style.backgroundColor = riskColor;
+                    if (riskLabel) {
+                        riskLabel.textContent = `${riskText} · ${data.credibility_rating || 'Unknown'} credibility`;
+                        riskLabel.style.color = riskColor;
+                    }
+                }
+
+                const credibilityLabel = document.getElementById('credibility-rating');
+                if (credibilityLabel) {
+                    credibilityLabel.textContent = data.credibility_rating
+                        ? `Credibility: ${data.credibility_rating}`
+                        : 'Credibility rating unavailable';
+                }
+
+                const intensityLabel = document.getElementById('emotional-intensity');
+                const emotionalFill = document.getElementById('emotional-intensity-fill');
+                const intensityValue = (data.emotional_intensity || '').toString().toLowerCase();
+                if (intensityLabel) {
+                    intensityLabel.textContent = intensityValue
+                        ? intensityValue.charAt(0).toUpperCase() + intensityValue.slice(1)
+                        : '--';
+                }
+                if (emotionalFill) {
+                    let intensityWidth = 30;
+                    let intensityColor = '#10B981';
+                    if (intensityValue === 'high') {
+                        intensityWidth = 90;
+                        intensityColor = '#EF4444';
+                    } else if (intensityValue === 'medium') {
+                        intensityWidth = 60;
+                        intensityColor = '#F59E0B';
+                    }
+                    emotionalFill.style.width = `${intensityWidth}%`;
+                    emotionalFill.style.backgroundColor = intensityColor;
+                }
+
+                const intensityScoreMap = { low: 3, medium: 6, high: 9 };
+                const credibilityScoreMap = { High: 9, Medium: 6, Low: 3 };
+                const emotionalLoadScore = intensityScoreMap[intensityValue] ?? 5;
+                const credibilityScore = credibilityScoreMap[data.credibility_rating] ?? 5;
+                const biasCount = (data.biases && Array.isArray(data.biases)) ? data.biases.length : 0;
+                const distortionDensityScore = Math.min(10, biasCount * 3);
+                const threatPerceptionScore = Math.min(10, Math.round((misinfoScore || 0) / 10));
+                const clarityIndexScore = Math.max(0, Math.min(10, Math.round((credibilityScore + (10 - distortionDensityScore) + (10 - threatPerceptionScore)) / 3)));
+
+                const updateMetric = (value, valueElementId, barElementId, color) => {
+                    const safeValue = Math.max(0, Math.min(10, Math.round(value)));
+                    const valueElement = document.getElementById(valueElementId);
+                    const barElement = document.getElementById(barElementId);
+                    if (valueElement) {
+                        valueElement.textContent = `${safeValue}/10`;
+                    }
+                    if (barElement) {
+                        barElement.style.width = `${safeValue * 10}%`;
+                        barElement.style.backgroundColor = color;
+                    }
+                };
+
+                updateMetric(emotionalLoadScore, 'emotional-load-value', 'emotional-load-bar', '#F59E0B');
+                updateMetric(credibilityScore, 'logical-coherence-value', 'logical-coherence-bar', '#10B981');
+                updateMetric(distortionDensityScore, 'distortion-density-value', 'distortion-density-bar', '#EF4444');
+                updateMetric(threatPerceptionScore, 'threat-perception-value', 'threat-perception-bar', '#F97316');
+                updateMetric(clarityIndexScore, 'clarity-index-value', 'clarity-index-bar', '#3B82F6');
+
+                const distortionsContainer = document.getElementById('distortions');
+                if (distortionsContainer) {
+                    if (data.biases && data.biases.length > 0) {
+                        distortionsContainer.innerHTML = data.biases.map(bias => `
+                            <div class="distortion-tag">
+                                <strong>${bias.type || 'Bias'}:</strong> ${bias.explanation || bias.text_snippet || ''}
+                            </div>
+                        `).join('');
+                    } else {
+                        distortionsContainer.innerHTML = '<p class="text-sm text-gray-500">No significant biases detected.</p>';
+                    }
+                }
+
+                const summaryElement = document.getElementById('summary');
+                if (summaryElement) {
+                    summaryElement.innerHTML = `<p>${data.summary || 'No summary available.'}</p>`;
+                }
+
+                const recommendationsElement = document.getElementById('recommendations');
+                if (recommendationsElement) {
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        recommendationsElement.innerHTML = `
+                            <ul class="list-disc pl-5 space-y-1">
+                                ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        `;
+                    } else {
+                        recommendationsElement.innerHTML = '<p>No specific recommendations available.</p>';
+                    }
+                }
+
+                const reflectionStepsElement = document.getElementById('reflection-steps');
+                if (reflectionStepsElement) {
+                    if (data.reflection_steps && data.reflection_steps.length > 0) {
+                        reflectionStepsElement.innerHTML = data.reflection_steps.map((step, index) => `
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <h4 class="font-medium text-blue-800">${index + 1}. ${step.step}</h4>
+                                <p class="text-sm text-gray-700 mt-1">${step.prompt}</p>
+                                ${step.response ? `
+                                    <div class="mt-2 p-2 bg-white rounded border-l-4 border-blue-400 text-sm">
+                                        <p class="font-medium text-gray-700">Suggestion:</p>
+                                        <p class="text-gray-600">${step.response}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('');
+                    } else {
+                        reflectionStepsElement.innerHTML = '<p>No reflection steps provided.</p>';
+                    }
+                }
+
+                resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            } catch (error) {
+                console.error('Error displaying results:', error);
+                renderAnalysisError('Failed to display analysis results.', error.message);
+            }
+        }
+
+        function setResultsVisibility({ showLoader = false, showContent = false, showError = false }) {
+            const loader = document.getElementById('results-loader');
+            const content = document.getElementById('results-content');
+            const errorCard = document.getElementById('results-error');
+            if (loader) loader.classList.toggle('hidden', !showLoader);
+            if (content) content.classList.toggle('hidden', !showContent);
+            if (errorCard) {
+                errorCard.classList.toggle('hidden', !showError);
+                if (!showError) {
+                    errorCard.innerHTML = '';
+                }
+            }
+        }
+
+        function renderAnalysisError(message, details = '') {
+            const resultsArea = document.getElementById('results');
+            if (!resultsArea) return;
+            resultsArea.classList.remove('hidden');
+            setResultsVisibility({ showLoader: false, showContent: false, showError: true });
+
+            const errorCard = document.getElementById('results-error');
+            if (errorCard) {
+                errorCard.innerHTML = `
+                    <h2 class="section-title">Analysis Error</h2>
+                    <p class="text-red-500">${message}</p>
+                    ${details ? `<p class="text-sm text-gray-600 mt-2">${details}</p>` : ''}
+                `;
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element if it doesn't exist
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                document.body.appendChild(toast);
+            }
+            
+            // Set toast content and styles
+            toast.textContent = message;
+            toast.className = `toast toast-${type}`;
+            
+            // Show toast
+            toast.classList.add('show');
+            
+            // Hide after delay
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+    <!-- Add toast container -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Add footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h2 class="footer-logo">Clarity</h2>
+                <p class="footer-tag">Think Clearly. Choose Wisely.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scanner.html">Scanner</a></li>
+                    <li><a href="clarity_analysis.html">Clarity Analysis</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">© 2025 Clarity • All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Initialize any remaining JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any additional initialization code here
+        });
+    </script>
+</body>
+</html>

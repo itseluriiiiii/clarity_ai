@@ -14,18 +14,32 @@
      <!-- Navigation -->
     <nav class="navbar">
         <div class="logo">
-            <i data-feather="shield"></i>
-            <span>QLogic</span>
+            <span>Clarity</span>
         </div>
+
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i data-feather="menu"></i>
+        </button>
+
         <div class="nav-links">
             <a href="index.html" class="nav-btn">Home</a>
             <a href="scanner.html" class="nav-btn active">Scanner</a>
-            <a href="training.html" class="nav-btn">Training</a>
+            <a href="clarity_analysis.html" class="nav-btn">Clarity Analysis</a>
+            <a href="reflection-guide.html" class="nav-btn">Reflection Guide</a>
+            <a href="chatbot.html" class="nav-btn">Chatbot</a>
         </div>
     </nav>
 
     <!-- Main Content -->
     <main id="app">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Credibility Scanner</h1>
+                <p>Paste text or a URL to analyze for bias, fallacies, and credibility markers</p>
+            </div>
+        </section>
+
         <section class="scanner-container">
             <h2>Credibility Scanner</h2>
             <p>Paste text or a URL to analyze for bias and fallacies.</p>
@@ -39,40 +53,94 @@
 
             <!-- RESULTS SECTION -->
             <div id="results-area" class="results-area hidden">
-                <div class="score-card">
-                    <div class="score-circle" id="score-circle">
-                        <span id="score-value">--</span>
+                <div class="results-grid">
+                    <div class="result-card score-card">
+                        <div class="card-top">
+                            <div class="brand">
+                                <div>
+                                    <p class="brand-name">Credibility Scan</p>
+                                    <span class="meta-text" id="analysis-timestamp">--</span>
+                                </div>
+                            </div>
+                            <button class="ghost-btn" type="button">
+                                <i data-feather="bookmark"></i>
+                                Save
+                            </button>
+                        </div>
+                        <div class="score-main">
+                            <div class="score-value" id="score-value">--</div>
+                            <div>
+                                <p class="score-label">Misinformation Score</p>
+                                <div class="tag-row">
+                                    <span class="pill" id="emotion-pill">Emotion: --</span>
+                                    <span class="pill" id="credibility-pill">Credibility: --</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-bottom">
+                            <div class="price-range" id="risk-label">Awaiting analysis</div>
+                            <button class="primary-chip" type="button" onclick="analyzeContent()">Re-run</button>
+                        </div>
                     </div>
-                    <div class="score-label">Credibility Score</div>
-                </div>
 
-                <div class="metrics-row">
-                    <div class="metric">
-                        <span class="label">Emotion</span>
-                        <span class="value" id="metric-emotion">--</span>
+                    <div class="result-card summary-card">
+                        <div class="card-top">
+                            <div class="brand">
+                                <div class="brand-icon neutral">
+                                    <i data-feather="align-left"></i>
+                                </div>
+                                <div>
+                                    <p class="brand-name">Key Takeaway</p>
+                                    <span class="meta-text">Narrative snapshot</span>
+                                </div>
+                            </div>
+                        </div>
+                        <h3>Summary</h3>
+                        <p id="summary-text" class="summary-body">Running analysis...</p>
                     </div>
-                    <div class="metric">
-                        <span class="label">Credibility</span>
-                        <span class="value" id="metric-credibility">--</span>
+
+                    <div class="result-card">
+                        <div class="card-top">
+                            <div class="brand">
+                                <div class="brand-icon danger">
+                                    <i data-feather="alert-triangle"></i>
+                                </div>
+                                <div>
+                                    <p class="brand-name">Detected Issues</p>
+                                    <span class="meta-text">Fallacies & distortions</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bias-list" class="stacked-list">
+                            <!-- Bias cards injected here -->
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="card-top">
+                            <div class="brand">
+                                <div class="brand-icon positive">
+                                    <i data-feather="check-circle"></i>
+                                </div>
+                                <div>
+                                    <p class="brand-name">Next Steps</p>
+                                    <span class="meta-text">Ground yourself & verify</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="rec-list" class="pill-grid">
+                            <!-- Recommendation pills -->
+                        </div>
                     </div>
                 </div>
 
-                <div class="summary-card">
-                    <h3>Summary</h3>
-                    <p id="summary-text">...</p>
-                </div>
-
-                <div class="details-section">
-                    <h3>Detected Issues</h3>
-                    <ul id="bias-list" class="bias-list">
-                        <!-- Bias items will be injected here -->
-                    </ul>
-                </div>
-
-                <div class="recommendations-section">
-                    <h3>Recommendations</h3>
-                    <ul id="rec-list" class="rec-list">
-                        <!-- Recommendations injected here -->
+                <div id="reflection-steps" class="reflection-section hidden">
+                    <div class="reflection-header">
+                        <h3>Guided Reflection</h3>
+                        <span class="meta-text">Work through each step mindfully</span>
+                    </div>
+                    <ul id="reflection-list" class="reflection-list">
+                        <!-- Reflection steps injected here -->
                     </ul>
                 </div>
             </div>
@@ -81,7 +149,43 @@
 
     <script src="script.js"></script>
     <script>
+        // Initialize feather icons
         feather.replace();
+        
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navLinks.classList.contains('active')) {
+                        feather.icons.x.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    } else {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            }
+            
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    const icon = document.querySelector('.menu-toggle i');
+                    if (icon) {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            });
+        });
     </script>
 </body>
 

@@ -24,14 +24,19 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="logo">
-            <i data-feather="shield"></i>
             <span>Clarity</span>
         </div>
 
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i data-feather="menu"></i>
+        </button>
+
         <div class="nav-links">
-            <a href="index.html" class="nav-btn active">Home</a>
-            <a href="scanner.html" class="nav-btn">Scanner</a>
-            <a href="training.html" class="nav-btn">Training</a>
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="scanner.html" class="nav-btn active">Scanner</a>
+            <a href="clarity_analysis.html" class="nav-btn">Clarity Analysis</a>
+            <a href="reflection-guide.html" class="nav-btn">Reflection Guide</a>
+            <a href="chatbot.html" class="nav-btn">Chatbot</a>
         </div>
     </nav>
 
@@ -52,7 +57,7 @@
 
             <div class="scroll-indicator">
                 <span>Scroll Down</span>
-                <i class="scroll-arrow">↓</i>
+                <i data-feather="chevron-down" class="scroll-arrow"></i>
             </div>
         </section>
 
@@ -78,22 +83,23 @@
                     </div>
 
                     <!-- Card 2 -->
-                    <div class="info-card collapsed">
+                    <div class="info-card expanded">
                         <div class="card-header">
-                            <h3>Cognitive Streak</h3>
-                            <i data-feather="plus"></i>
+                            <h3>Our Team</h3>
+                            <i data-feather="users"></i>
                         </div>
 
-                        <div class="card-content hidden">
-                            <div class="streak-value">3 Days</div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="info-card collapsed">
-                        <div class="card-header">
-                            <h3>Recent Activity</h3>
-                            <i data-feather="plus"></i>
+                        <div class="card-content">
+                            <div class="team-info">
+                                <h4>Team Name: NeuroFusion</h4>
+                                <ul class="team-members">
+                                    <li>Moumita Paul</li>
+                                    <li>Likith C</li>
+                                    <li>Shraddha B R</li>
+                                    <li>Ruhi Sharma</li>
+                                    <li>Arnav Elluri</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -105,10 +111,10 @@
                     <div class="feature-content">
                         <span class="badge">New Module</span>
                         <h2>Master Your Mind</h2>
-                        <p>Level up your critical thinking skills with our advanced logic training modules.</p>
+                        <p>Analyze text for cognitive load, clarity, and potential distortions with our advanced analysis tool.</p>
 
-                        <a href="training.html" class="feature-btn" style="text-decoration: none;">
-                            Start Training <i data-feather="arrow-right"></i>
+                        <a href="clarity_analysis.html" class="feature-btn" style="text-decoration: none;">
+                            Clarity Analysis <i data-feather="arrow-right"></i>
                         </a>
                     </div>
 
@@ -135,7 +141,7 @@
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
                         <li><a href="scanner.html">Scanner</a></li>
-                        <li><a href="training.html">Training</a></li>
+                        <li><a href="clarity_analysis.html">Clarity Analysis</a></li>
                     </ul>
                 </div>
                 <div class="footer-bottom">
@@ -148,7 +154,43 @@
 
     <script src="script.js"></script>
     <script>
+        // Initialize feather icons
         feather.replace();
+        
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navLinks.classList.contains('active')) {
+                        feather.icons.x.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    } else {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            }
+            
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    const icon = document.querySelector('.menu-toggle i');
+                    if (icon) {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            });
+        });
     </script>
 
 </body>

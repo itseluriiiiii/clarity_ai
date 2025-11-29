@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Clarity</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .chat-shell {
+            margin-top: 2rem;
+            background: var(--card-bg);
+            border-radius: 32px;
+            border: var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .chat-copy h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.75rem;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .chat-copy p {
+            color: var(--text-muted);
+        }
+
+        .chat-console {
+            background: #fff;
+            border-radius: 28px;
+            padding: 1.5rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 20px 45px -35px rgba(15, 23, 42, 0.35);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            padding: 0.85rem 1rem;
+            border-radius: 18px;
+            max-width: 85%;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #0d0245, #25147c);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
+        }
+
+        .bot-message {
+            background: rgba(148, 163, 184, 0.25);
+            color: #0f172a;
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            border-radius: 999px;
+            padding: 0.85rem 1.25rem;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            font-family: inherit;
+        }
+
+        .send-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.85rem 1.6rem;
+            background: #0d0245;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .typing-indicator {
+            display: none;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>Clarity</span>
+        </div>
+
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i data-feather="menu"></i>
+        </button>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="scanner.html" class="nav-btn">Scanner</a>
+            <a href="clarity_analysis.html" class="nav-btn">Clarity Analysis</a>
+            <a href="reflection-guide.html" class="nav-btn">Reflection Guide</a>
+            <a href="chatbot.html" class="nav-btn active">Chatbot</a>
+        </div>
+    </nav>
+
+    <main id="app">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>AI Chat Assistant</h1>
+                <p>Get instant insights and guidance on critical thinking and media literacy</p>
+            </div>
+        </section>
+
+        <section class="chat-shell">
+            <div class="chat-copy">
+                <span class="eyebrow">Conversational coach</span>
+                <h1>Talk through intense content calmly</h1>
+                <p>Use this AI companion to unpack emotional reactions, brainstorm reflection prompts, or explore fact-checking angles before you respond.</p>
+                <div class="panel-card subtle">
+                    <p class="panel-label">Pro tip</p>
+                    <p>Share snippets or URLs. I'll walk you through the 5-step reflection ritual and flag uncertainty when evidence is thin.</p>
+                </div>
+            </div>
+
+            <div class="chat-console">
+                <div id="chat-messages">
+                    <div class="message bot-message">
+                        Hey! I'm here to help you slow down, breathe, and make sense of whatever you're reading. What's on your mind?
+                    </div>
+                </div>
+
+                <div id="typing-indicator" class="typing-indicator">
+                    Clarity AI is typing…
+                </div>
+
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="user-input" placeholder="Ask me about a post, rumor, or emotion..." required>
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialize feather icons
+        feather.replace();
+        
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (navLinks.classList.contains('active')) {
+                        feather.icons.x.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    } else {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            }
+            
+            // Close menu when clicking on a nav link
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    const icon = document.querySelector('.menu-toggle i');
+                    if (icon) {
+                        feather.icons.menu.toSvg().then(svg => {
+                            icon.outerHTML = svg;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

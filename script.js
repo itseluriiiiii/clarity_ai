@@ -22,7 +22,7 @@ async function analyzeContent() {
     resultsArea.classList.add('hidden');
 
     try {
-        const response = await fetch('http://localhost:5000/api/analyze', {
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,7 +31,8 @@ async function analyzeContent() {
         });
 
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            const errorBody = await response.text();
+            throw new Error(`Server error: ${response.status} ${errorBody}`);
         }
 
         const data = await response.json();
@@ -52,40 +53,70 @@ function renderResults(data) {
     const resultsArea = document.getElementById('results-area');
     resultsArea.classList.remove('hidden');
 
-    // Score
+    // Score + pills
     const scoreVal = document.getElementById('score-value');
-    const scoreCircle = document.getElementById('score-circle');
-    scoreVal.innerText = data.misinformation_score;
+    const emotionPill = document.getElementById('emotion-pill');
+    const credibilityPill = document.getElementById('credibility-pill');
+    const riskLabel = document.getElementById('risk-label');
+    const timestamp = document.getElementById('analysis-timestamp');
 
-    // Color coding based on score
-    let color = '#10B981'; // Green
-    if (data.misinformation_score > 20) color = '#F59E0B'; // Yellow
-    if (data.misinformation_score > 50) color = '#E11D48'; // Red
+    const score = typeof data.misinformation_score === 'number' ? data.misinformation_score : '--';
+    scoreVal.innerText = score;
 
-    scoreCircle.style.borderColor = color;
+    let color = '#10B981';
+    let riskText = 'Low risk · information appears stable.';
+    if (score !== '--' && score > 50) {
+        color = '#DC2626';
+        riskText = 'High risk · verify immediately.';
+    } else if (score !== '--' && score > 20) {
+        color = '#F59E0B';
+        riskText = 'Moderate risk · cross-check claims.';
+    }
+
     scoreVal.style.color = color;
+    if (riskLabel) {
+        riskLabel.innerText = riskText;
+        riskLabel.style.color = color;
+    }
 
-    // Metrics
-    document.getElementById('metric-emotion').innerText = data.emotional_intensity;
-    document.getElementById('metric-credibility').innerText = data.credibility_rating;
-    document.getElementById('summary-text').innerText = data.summary;
+    if (emotionPill) {
+        emotionPill.innerText = `Emotion: ${data.emotional_intensity || '--'}`;
+    }
+    if (credibilityPill) {
+        credibilityPill.innerText = `Credibility: ${data.credibility_rating || '--'}`;
+    }
+    if (timestamp) {
+        const now = new Date();
+        timestamp.innerText = now.toLocaleString('en-IN', {
+            hour12: true,
+            hour: '2-digit',
+            minute: '2-digit',
+            day: 'numeric',
+            month: 'short'
+        });
+    }
+
+    document.getElementById('summary-text').innerText = data.summary || 'No summary available.';
 
     // Biases
     const biasList = document.getElementById('bias-list');
     biasList.innerHTML = '';
     if (data.biases && data.biases.length > 0) {
         data.biases.forEach(bias => {
-            const li = document.createElement('li');
-            li.className = 'bias-item';
-            li.innerHTML = `
-                <span class="bias-type">${bias.type}</span>
-                <p>"${bias.text_snippet}"</p>
-                <small>${bias.explanation}</small>
+            const card = document.createElement('div');
+            card.className = 'bias-card';
+            card.innerHTML = `
+                <div class="bias-card-title">${bias.type || 'Bias'}</div>
+                <p>"${bias.text_snippet || '—'}"</p>
+                <small>${bias.explanation || ''}</small>
             `;
-            biasList.appendChild(li);
+            biasList.appendChild(card);
         });
     } else {
-        biasList.innerHTML = '<li>No significant biases detected.</li>';
+        const empty = document.createElement('div');
+        empty.className = 'bias-card';
+        empty.innerText = 'No significant biases detected.';
+        biasList.appendChild(empty);
     }
 
     // Recommendations
@@ -93,11 +124,43 @@ function renderResults(data) {
     recList.innerHTML = '';
     if (data.recommendations && data.recommendations.length > 0) {
         data.recommendations.forEach(rec => {
-            const li = document.createElement('li');
-            li.className = 'rec-item';
-            li.innerText = rec;
-            recList.appendChild(li);
+            const pill = document.createElement('span');
+            pill.className = 'pill-chip';
+            pill.innerText = rec;
+            recList.appendChild(pill);
         });
+    } else {
+        const pill = document.createElement('span');
+        pill.className = 'pill-chip';
+        pill.innerText = 'No recommendations returned.';
+        recList.appendChild(pill);
+    }
+
+    // Reflection Steps
+    const reflectionsWrapper = document.getElementById('reflection-steps');
+    const reflectionsList = document.getElementById('reflection-list');
+    if (reflectionsWrapper && reflectionsList) {
+        reflectionsList.innerHTML = '';
+        if (Array.isArray(data.reflection_steps) && data.reflection_steps.length > 0) {
+            reflectionsWrapper.classList.remove('hidden');
+            data.reflection_steps.forEach((step, index) => {
+                const stepName = step.step || `Step ${index + 1}`;
+                const stepPrompt = step.prompt || 'Focus on what feels most important right now.';
+                const stepResponse = step.response || 'No guidance provided for this step.';
+                const li = document.createElement('li');
+                li.className = 'reflection-item';
+                li.innerHTML = `
+                    <div class="reflection-step-header">
+                        <span class="reflection-step-name">${stepName}</span>
+                        <small class="reflection-step-prompt">${stepPrompt}</small>
+                    </div>
+                    <p class="reflection-response">${stepResponse}</p>
+                `;
+                reflectionsList.appendChild(li);
+            });
+        } else {
+            reflectionsWrapper.classList.add('hidden');
+        }
     }
 }
 
@@ -128,7 +191,79 @@ document.addEventListener('DOMContentLoaded', () => {
         // This ensures the scroll event isn't being prevented
         console.log('Scrolling...');
     });
+
+    // Chatbot wiring
+    initChatbot();
 });
+
+// Chatbot Logic
+const chatState = {
+    history: []
+};
+
+function appendChatMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+
+    const bubble = document.createElement('div');
+    bubble.className = `message ${role === 'user' ? 'user-message' : 'bot-message'}`;
+    bubble.textContent = text;
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+}
+
+function toggleTypingIndicator(show) {
+    const indicator = document.getElementById('typing-indicator');
+    if (!indicator) return;
+    indicator.style.display = show ? 'block' : 'none';
+}
+
+function initChatbot() {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+    const messages = document.getElementById('chat-messages');
+    if (!form || !input || !messages) return;
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendChatMessage('user', text);
+        chatState.history.push({ role: 'user', text });
+        input.value = '';
+        input.disabled = true;
+        toggleTypingIndicator(true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    history: chatState.history
+                })
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`Chat failed: ${response.status} ${errorBody}`);
+            }
+
+            const data = await response.json();
+            const reply = data.reply || 'I ran into an issue responding. Could you try again?';
+            appendChatMessage('model', reply);
+            chatState.history.push({ role: 'model', text: reply });
+        } catch (error) {
+            console.error('Chat error:', error);
+            appendChatMessage('model', 'Sorry, I could not reach the AI right now. Please try again in a moment.');
+        } finally {
+            toggleTypingIndicator(false);
+            input.disabled = false;
+            input.focus();
+        }
+    });
+}
 
 // Preloader
 function initPreloader() {

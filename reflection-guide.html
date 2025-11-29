@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflection Guide - Clarity</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .reflection-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .reflection-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: var(--glass-border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 18px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E5E7EB;
+            z-index: 0;
+        }
+
+        .step-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            z-index: 1;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 100px;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .reflection-prompt {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .response-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid #E5E7EB;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .response-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(25, 4, 130, 0.05);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(25, 4, 130, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(25, 4, 130, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 2rem 0;
+            display: none;
+        }
+
+        .guidance-callout {
+            background: rgba(25, 4, 130, 0.05);
+            border: 1px solid rgba(25, 4, 130, 0.15);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .guidance-callout h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .guidance-callout ul {
+            list-style: disc inside;
+            margin: 0;
+            padding-left: 1rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-card {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px -30px rgba(15, 23, 42, 0.4);
+        }
+
+        .input-card label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-main);
+        }
+
+        .input-card textarea {
+            width: 100%;
+            min-height: 120px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .input-card textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 4, 130, 0.15);
+        }
+
+        .input-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .input-actions .btn {
+            align-self: flex-start;
+        }
+
+        .status-message {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            min-height: 1.2rem;
+        }
+
+        .status-message[data-status="success"] { color: #059669; }
+        .status-message[data-status="error"] { color: #dc2626; }
+        .status-message[data-status="warning"] { color: #d97706; }
+
+        .coach-note {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .coach-note.hidden {
+            display: none;
+        }
+
+        .completion-message h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .step-label {
+                font-size: 0.7rem;
+            }
+            
+            .reflection-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .reflection-prompt {
+                font-size: 1.1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <span>Clarity</span>
+        </div>
+
+        <button class="menu-toggle" aria-label="Toggle menu">
+            <i data-feather="menu"></i>
+        </button>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn">Home</a>
+            <a href="scanner.html" class="nav-btn">Scanner</a>
+            <a href="clarity_analysis.html" class="nav-btn">Clarity Analysis</a>
+            <a href="reflection-guide.html" class="nav-btn active">Reflection Guide</a>
+            <a href="chatbot.html" class="nav-btn">Chatbot</a>
+        </div>
+    </nav>
+
+    <main id="app">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Reflection Guide</h1>
+                <p>Slow down your thoughts and see the situation with clearer perspective</p>
+            </div>
+        </section>
+
+            <div class="input-card">
+                <label for="reflection-input-text">Paste the content you want clarity on</label>
+                <textarea id="reflection-input-text" placeholder="Paste at least a few sentences of the post, rumor, or claim you want to reflect on..."></textarea>
+                <div class="input-actions">
+                    <button class="btn btn-primary" id="reflection-fetch-btn" type="button">Generate adaptive questions</button>
+                    <p class="status-message" id="reflection-status" data-status="info" role="status">Your tailored questions will appear after analysis.</p>
+                </div>
+            </div>
+            
+            <div class="reflection-card" id="adaptive-steps">
+                <div class="step-indicator">
+                    <div class="step-line">
+                        <div class="step-progress" id="progress-bar"></div>
+                    </div>
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Pause & Breathe</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Identify Emotions</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Question Source</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Consider Alternatives</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Final Reflection</div>
+                    </div>
+                </div>
+
+                <div id="step-1" class="step-content active">
+                    <div class="reflection-prompt">Before reacting, take a moment. What is the content claiming? Write it in your own words.</div>
+                    <p class="coach-note hidden" id="step-1-coach"></p>
+                    <textarea class="response-input" placeholder="The content claims that..."></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-outline" disabled>Previous</button>
+                        <button class="btn btn-primary" onclick="nextStep(1)">Next</button>
+                    </div>
+                </div>
+
+                <div id="step-2" class="step-content">
+                    <div class="reflection-prompt">What emotions does this content trigger? Are you feeling scared, angry, excited, or validated?</div>
+                    <p class="coach-note hidden" id="step-2-coach"></p>
+                    <textarea class="response-input" placeholder="This makes me feel...because..."></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-outline" onclick="prevStep(2)">Previous</button>
+                        <button class="btn btn-primary" onclick="nextStep(2)">Next</button>
+                    </div>
+                </div>
+
+                <div id="step-3" class="step-content">
+                    <div class="reflection-prompt">Who created this? What might be their motivation? Is this a reliable, unbiased source?</div>
+                    <p class="coach-note hidden" id="step-3-coach"></p>
+                    <textarea class="response-input" placeholder="The source is... Their motivation might be..."></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-outline" onclick="prevStep(3)">Previous</button>
+                        <button class="btn btn-primary" onclick="nextStep(3)">Next</button>
+                    </div>
+                </div>
+
+                <div id="step-4" class="step-content">
+                    <div class="reflection-prompt">What's an opposing viewpoint? What would someone who disagrees say? What evidence would challenge this?</div>
+                    <p class="coach-note hidden" id="step-4-coach"></p>
+                    <textarea class="response-input" placeholder="Someone might argue that... The counter-evidence could be..."></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-outline" onclick="prevStep(4)">Previous</button>
+                        <button class="btn btn-primary" onclick="nextStep(4)">Next</button>
+                    </div>
+                </div>
+
+                <div id="step-5" class="step-content">
+                    <div class="reflection-prompt">After this analysis, has your initial reaction changed? What will you do with this information?</div>
+                    <p class="coach-note hidden" id="step-5-coach"></p>
+                    <textarea class="response-input" placeholder="My conclusion is... I will..."></textarea>
+                    <div class="button-group">
+                        <button class="btn btn-outline" onclick="prevStep(5)">Previous</button>
+                        <button class="btn btn-primary" onclick="completeReflection()">Complete</button>
+                    </div>
+                </div>
+
+                <!-- Analysis Results Section -->
+                <div id="analysis-results" class="step-content hidden">
+                    <div class="analysis-container">
+                        <h3>Your Reflection Analysis</h3>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <span id="reflection-score">0</span>
+                                <small>Reflection Score</small>
+                            </div>
+                        </div>
+                        <div id="analysis-text" class="analysis-text"></div>
+                        <div class="button-group" style="margin-top: 20px;">
+                            <button class="btn btn-outline" onclick="restartReflection()">Start Over</button>
+                            <button class="btn btn-primary" onclick="closeAnalysis()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="completion-message" class="completion-message">
+                <i data-feather="check-circle" width="48" height="48" style="color: var(--success); margin-bottom: 1rem;"></i>
+                <h2>Reflection Complete</h2>
+                <p>You've taken important steps to think critically about this content. Consider saving your responses for future reference.</p>
+                <button class="btn btn-primary" onclick="startNewReflection()" style="margin-top: 1.5rem;">Start New Reflection</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const STEP_COUNT = 5;
+        const DEFAULT_REFLECTION_STEPS = {
+            1: {
+                label: 'Pause & Breathe',
+                prompt: 'Before reacting, take a moment. What is the content claiming? Write it in your own words.',
+                placeholder: 'The content claims that...'
+            },
+            2: {
+                label: 'Identify Emotions',
+                prompt: 'What emotions does this content trigger? Are you feeling scared, angry, excited, or validated?',
+                placeholder: 'This makes me feel...because...'
+            },
+            3: {
+                label: 'Question Source',
+                prompt: 'Who created this? What might be their motivation? Is this a reliable, unbiased source?',
+                placeholder: 'The source is... Their motivation might be...'
+            },
+            4: {
+                label: 'Consider Alternatives',
+                prompt: "What's an opposing viewpoint? What would someone who disagrees say? What evidence would challenge this?",
+                placeholder: 'Someone might argue that... The counter-evidence could be...'
+            },
+            5: {
+                label: 'Final Reflection',
+                prompt: 'After this analysis, has your initial reaction changed? What will you do with this information?',
+                placeholder: 'My conclusion is... I will...'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            loadSavedResponses();
+            setupReflectionFetcher();
+        });
+
+        const responses = {
+            1: '',
+            2: '',
+            3: '',
+            4: '',
+            5: ''
+        };
+
+        function setStatusMessage(message, status = 'info') {
+            const statusEl = document.getElementById('reflection-status');
+            if (!statusEl) return;
+            statusEl.textContent = message;
+            statusEl.dataset.status = status;
+        }
+
+        function applyAdaptiveQuestionsMap(questionMap) {
+            Object.keys(questionMap).forEach(stepKey => {
+                const stepNumber = Number(stepKey);
+                if (!Number.isFinite(stepNumber)) return;
+                const promptEl = document.querySelector(`#step-${stepNumber} .reflection-prompt`);
+                if (promptEl) {
+                    promptEl.textContent = questionMap[stepKey];
+                }
+            });
+        }
+
+        async function fetchAdaptiveQuestions(userText) {
+            setStatusMessage('Analyzing content…', 'info');
+
+            try {
+                const response = await fetch('/api/reflection/questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: userText })
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(payload.error || 'Reflection service error');
+                }
+
+                const questions = payload.questions || {};
+                applyAdaptiveQuestionsMap(questions);
+                setStatusMessage('Adaptive questions generated ✔', 'success');
+
+            } catch (error) {
+                console.error('Reflection fetch error:', error);
+                setStatusMessage(error.message || 'Failed to fetch reflection questions.', 'error');
+            }
+        }
+
+        function setupReflectionFetcher() {
+            const fetchBtn = document.getElementById('reflection-fetch-btn');
+            const textInput = document.getElementById('reflection-input-text');
+            if (!fetchBtn || !textInput) return;
+
+            fetchBtn.addEventListener('click', () => {
+                const text = textInput.value.trim();
+                if (text.length < 20) {
+                    setStatusMessage('Please paste at least 2–3 sentences.', 'warning');
+                    return;
+                }
+
+                fetchAdaptiveQuestions(text);
+            });
+        }
+
+        function updateProgressBar(step) {
+            const progress = ((step - 1) / (STEP_COUNT - 1)) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function updateStepIndicators(currentStep) {
+            document.querySelectorAll('.step').forEach(step => {
+                const stepNum = Number(step.getAttribute('data-step'));
+                step.classList.remove('active', 'completed');
+
+                if (stepNum === currentStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            const nextContent = document.getElementById(`step-${step}`);
+            if (nextContent) {
+                nextContent.classList.add('active');
+                updateStepIndicators(step);
+                updateProgressBar(step);
+            }
+        }
+
+        function saveResponse(step) {
+            const input = document.querySelector(`#step-${step} .response-input`);
+            const response = input ? input.value : '';
+            responses[step] = response;
+            localStorage.setItem('reflectionResponses', JSON.stringify(responses));
+        }
+
+        function loadSavedResponses() {
+            const savedResponses = localStorage.getItem('reflectionResponses');
+            if (!savedResponses) return;
+            const parsed = JSON.parse(savedResponses);
+            Object.keys(parsed).forEach(step => {
+                responses[step] = parsed[step];
+                const input = document.querySelector(`#step-${step} .response-input`);
+                if (input) input.value = parsed[step];
+            });
+        }
+
+        async function adaptNextStep(currentStep, userAnswer) {
+            const nextStepNumber = currentStep + 1;
+            if (nextStepNumber > STEP_COUNT) return;
+
+            try {
+                const response = await fetch('/api/reflection/next', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_step: currentStep, answer: userAnswer })
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(payload.error || 'Failed to adapt next question');
+                }
+
+                const question = (payload.question || '').trim();
+                const promptEl = document.querySelector(`#step-${nextStepNumber} .reflection-prompt`);
+                if (question && promptEl) {
+                    promptEl.textContent = question;
+                }
+            } catch (error) {
+                console.error('Adaptation error:', error);
+            }
+        }
+
+        async function nextStep(currentStep) {
+            saveResponse(currentStep);
+            const answer = (responses[currentStep] || '').trim();
+
+            if (currentStep < STEP_COUNT && answer) {
+                await adaptNextStep(currentStep, answer);
+            }
+
+            showStep(currentStep + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function prevStep(currentStep) {
+            saveResponse(currentStep);
+            showStep(currentStep - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function completeReflection() {
+            saveResponse(5);
+            document.querySelector('.step-indicator').style.display = 'none';
+            document.querySelectorAll('.step-content').forEach(el => el.style.display = 'none');
+            document.getElementById('completion-message').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startNewReflection() {
+            document.querySelectorAll('.response-input').forEach(input => {
+                input.value = '';
+            });
+
+            document.querySelector('.step-indicator').style.display = 'flex';
+            document.getElementById('completion-message').style.display = 'none';
+
+            Object.keys(responses).forEach(key => {
+                responses[key] = '';
+            });
+            localStorage.removeItem('reflectionResponses');
+
+            showStep(1);
+        }
+    </script>
+</body>
+</html>
