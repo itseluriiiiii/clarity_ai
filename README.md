@@ -81,7 +81,7 @@ Lessons that teach:
 Clarity AI promotes digital clarity, emotional wellness, and safe internet habits. In an age of information overload, it helps users pause, reflect, and think clearly.
 
 ## 👥 Contributors
-- **Arnav Eluri** — Developer
+- **Arnav Elluri** — Developer
 - **Ruhi Sharma** — Developer  
 
 ## Photos 
